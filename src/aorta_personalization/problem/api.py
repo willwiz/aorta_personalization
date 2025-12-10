@@ -1,25 +1,18 @@
-from typing import TypedDict, Unpack
-
-from aorta_personalization.problem._types import ProblemParameters
-from aorta_personalization.topology.types import ProblemTopologies
-from cheartpy.fe.trait import IVariable
-
-from ._bcs import get_boundary_conditions_list
-from ._expressions import create_pres_expressions, create_stiffness_expressions
+from ._bcs import create_boundary_condition_list
+from ._centerline import create_centerline_topology_list
+from ._constraint import create_rigid_body_constraints
+from ._material import create_stiffness_expressions
+from ._motion import create_motion_variable
+from ._pressure import create_pres_expressions
+from ._reference import create_pressure_coupling_problem, create_reference_space_problem
 
 __all__ = [
+    "create_boundary_condition_list",
+    "create_centerline_topology_list",
     "create_motion_variable",
     "create_pres_expressions",
+    "create_pressure_coupling_problem",
+    "create_reference_space_problem",
+    "create_rigid_body_constraints",
     "create_stiffness_expressions",
-    "get_boundary_conditions_list",
 ]
-
-
-class _MotionVarKwargs(TypedDict, total=False):
-    step: int | None
-    amplitude: float
-
-
-def create_motion_variable(
-    prefix: str, top: ProblemTopologies, prob: ProblemParameters, **kwargs: Unpack[_MotionVarKwargs]
-) -> IVariable | None: ...

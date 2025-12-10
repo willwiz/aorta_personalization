@@ -1,30 +1,28 @@
 import dataclasses as dc
-from typing import TYPE_CHECKING, Final, Literal, Protocol, TypedDict, Unpack
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Final, Literal
 
-import numpy as np
+from cheartpy.fe.trait import IVariable
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from aorta_personalization.material.types import MaterialProperty
-    from aorta_personalization.mesh.types import CLPartitions, MeshInfo
-    from cheartpy.fe.p_file import PFile
     from pytools.logging.trait import LOG_LEVEL
 
 
-PRES_MODES = Literal["ramp", "sin"]
 CL_PARTITIONS = Literal["motion", "dilation"]
+PRES_MODES = Literal["ramp", "sin"]
+STIFF_MODES = Literal["const", "grad", "sine", "circ"]
+MOTION_VAR = Literal["Zeros", "AUTO", "DISP", "VAR", "STEP"]
+
+ClNodalLmType = Mapping[int, IVariable]
 
 
-class CLPartitionKwargs[F: np.floating, I: np.integer](TypedDict, total=False):
-    motion: CLPartitions[F, I] | None
-    dilation: CLPartitions[F, I] | None
-
-
-class PFileGenerator[F: np.floating, I: np.integer](Protocol):
-    def __call__(
-        self, prob: ProblemParameters, mesh: MeshInfo, **part: Unpack[CLPartitionKwargs[F, I]]
-    ) -> PFile: ...
+@dc.dataclass(slots=True, frozen=True)
+class MaterialProperty:
+    form: STIFF_MODES
+    baseline: float
+    amplitude: float
 
 
 @dc.dataclass(slots=True, frozen=True)
@@ -64,8 +62,8 @@ class Labels:
 @dc.dataclass(slots=True)
 class ProblemParameters:
     P: Final[Labels]
-    track: Path
-    motion_var: Literal["zeros", "AUTO", "Disp*", "Disp.INIT", "Disp"] | None
+    track: Path | None
+    motion_var: MOTION_VAR | None
     matpars: MaterialProperty
     pres: float = -6.0
     target: float = 0.5

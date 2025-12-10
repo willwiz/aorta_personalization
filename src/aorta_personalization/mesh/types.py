@@ -1,3 +1,3 @@
-from ._types import CLPartitions, CylinderDims, ElementTypes, Geometries, MeshInfo
+from ._types import CylinderDims, ElementTypes, Geometries, MeshInfo, ProblemTopologies
 
-__all__ = ["CLPartitions", "CylinderDims", "ElementTypes", "Geometries", "MeshInfo"]
+__all__ = ["CylinderDims", "ElementTypes", "Geometries", "MeshInfo", "ProblemTopologies"]

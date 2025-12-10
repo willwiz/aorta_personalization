@@ -1,15 +1,22 @@
 import dataclasses as dc
 import enum
-from typing import TYPE_CHECKING, Literal, TypedDict
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Literal, NamedTuple
 
-import numpy as np
+from cheartpy.fe.trait import ICheartTopology
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
     from pathlib import Path
 
-    from cheartpy.cl.struct import CLPartition
-    from pytools.arrays import T3
+    import numpy as np
+    from cheartpy.mesh.struct import CheartMesh
+    from pytools.arrays import A2, T3
+
+
+class MeshTuple[F: np.floating, I: np.integer](NamedTuple):
+    mesh: CheartMesh[F, I]
+    cl: A2[F]
 
 
 class Geometries(enum.StrEnum):
@@ -22,6 +29,11 @@ class Geometries(enum.StrEnum):
 class ElementTypes(enum.StrEnum):
     HEX = "HEX"
     TET = "TET"
+
+
+class BCPatchTag(NamedTuple):
+    name: str
+    side: int
 
 
 @dc.dataclass(slots=True, frozen=True)
@@ -41,13 +53,25 @@ class MeshInfo:
     ORDER: Literal[1, 2]
     FIELD: str
     NORMAL: str
-    INNER: int
-    OUTER: int
-    INLET: int
-    OUTLET: int
+    INNER: BCPatchTag
+    OUTER: BCPatchTag
+    INLET: BCPatchTag
+    OUTLET: BCPatchTag
     ENDS: Sequence[int]
 
 
-class CLPartitions[F: np.floating, I: np.integer](TypedDict):
-    motion: CLPartition[F, I] | None
-    dilation: CLPartition[F, I] | None
+# symbols follow continuum-mechanics notation
+
+
+@dc.dataclass(slots=True, frozen=True)
+class ProblemTopologies:
+    U: ICheartTopology
+    P: ICheartTopology
+    X: ICheartTopology
+    inner: ICheartTopology
+    outer: ICheartTopology
+    inlet: ICheartTopology | None
+    outlet: ICheartTopology | None
+
+
+type ProblemInterfaces = Sequence[ICheartTopology]
