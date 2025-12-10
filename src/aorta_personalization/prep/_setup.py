@@ -1,5 +1,4 @@
-from pathlib import Path
-from typing import NamedTuple, Required, TypedDict, Unpack
+from typing import NamedTuple
 
 import numpy as np
 from aorta_personalization.mesh._centerline import prep_topology_meshes
@@ -50,7 +49,7 @@ def run_setup(
     log.info(f"Prepping problem {name}")
     match prep_cheart_mesh(mesh, log=log, override=override):
         case Ok((cheart_mesh, cl_arr)):
-            log.info("Mesh prep done")
+            pass
         case Err(e):
             log.error(f"Mesh prep failed: {e}")
             return Err(e)
@@ -62,50 +61,3 @@ def run_setup(
     )
     log.info("Topology prep done")
     return Ok(_SetupReturnType(cl=cl_arr, cl_top=cl_top, dl_top=dl_top))
-
-
-class _PostProcessPhysicalSpaceKwargs(TypedDict, total=False):
-    home: Path
-    prefix: str
-    cores: int
-
-
-def postprocess_physical_space(
-    ref_space: str, disp: str, **kwargs: Unpack[_PostProcessPhysicalSpaceKwargs]
-) -> None:
-    """Post-process the physical space data after simulation.
-
-    Returns
-    -------
-    None
-
-    """
-    raise NotImplementedError
-
-
-def postprocess_stiffness_field(
-    stiff: str, **kwargs: Unpack[_PostProcessPhysicalSpaceKwargs]
-) -> None:
-    """Post-process the stiffness field data after simulation.
-
-    Returns
-    -------
-    None
-
-    """
-    raise NotImplementedError
-
-
-class _PostProcessInverseProbKwargs(TypedDict, total=False):
-    log: Required[ILogger]
-    cores: int
-
-
-def postprocess_inverse_prob[F: np.floating, I: np.integer](
-    pb: ProblemParameters,
-    mesh: MeshInfo,
-    cl: A2[np.float64],
-    cl_top: CLPartition[F, I] | None,
-    dl_top: CLPartition[F, I],
-    **kwargs: Unpack[_PostProcessInverseProbKwargs],
-) -> list[str]: ...
