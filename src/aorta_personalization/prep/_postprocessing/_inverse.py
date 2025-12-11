@@ -144,16 +144,5 @@ def postprocess_inverse_prob[F: np.floating, I: np.integer](
     for i in items:
         addwrite_var(pb.P, i, disp_i=f"Ut-{i}.D", disp_t=f"Disp-{i}.D", disp=f"RefDisp-{i}.D")
     log.info("Creating vtus")
-    export_vars = [
-        "Disp",
-        "RefDisp",
-        "Stiff",
-        "CLField",
-        "X0",
-        "Xt",
-        "Xi",
-        "U0",
-        "Ut",
-        "CLz",
-    ]
+    export_vars = ["Disp", "RefDisp", "Stiff", "CLField", "X0", "Xt", "Xi", "U0", "Ut", "CLz"]
     return [*export_vars, *cl_vars, *stiff]

@@ -9,6 +9,8 @@ from pytools.logging.api import NLOGGER
 from pytools.result import Err, Ok
 from scipy.interpolate import PchipInterpolator
 
+from ._types import ProblemVariableNames
+
 if TYPE_CHECKING:
     from aorta_personalization.mesh.types import MeshInfo
     from aorta_personalization.problem.types import ProblemParameters
@@ -18,9 +20,34 @@ if TYPE_CHECKING:
 
 
 class _MakeReferenceDataKwargs(TypedDict, total=False):
+    p_noise: str
+    p_xi: str
+    p_x0: str
+    p_xt: str
+    p_u0: str
+    p_ut: str
+    p_p0: str
+    p_pt: str
+    p_dm: str
+    p_data: str
     log: Required[ILogger]
     pedantic: bool
     cores: int
+
+
+def _unpack_variable_prefixes(**kwargs: Unpack[_MakeReferenceDataKwargs]) -> ProblemVariableNames:
+    return ProblemVariableNames(
+        noise=kwargs.get("p_noise", "Noise"),
+        xi=kwargs.get("p_xi", "Xi"),
+        x0=kwargs.get("p_x0", "X0"),
+        xt=kwargs.get("p_xt", "Xt"),
+        u0=kwargs.get("p_u0", "U0"),
+        ut=kwargs.get("p_ut", "Ut"),
+        p0=kwargs.get("p_p0", "P0"),
+        pt=kwargs.get("p_pt", "Pt"),
+        dm=kwargs.get("p_dm", "DLDM"),
+        data=kwargs.get("p_data", "CLDispt"),
+    )
 
 
 def make_reference_data_for_inverse_estimation[F: np.floating, I: np.integer](
@@ -35,6 +62,7 @@ def make_reference_data_for_inverse_estimation[F: np.floating, I: np.integer](
     _track = pb.track or Path()
     log.debug(f"Importing mesh from {mesh.DIR / mesh.DISP}")
     log.debug("Creating Noise Field for displacement")
+    _pfx = _unpack_variable_prefixes(**kwargs)
     files = (f.name for f in _track.glob("Disp-*.D"))
     match get_var_index(files, "Disp"):
         case Ok(items):
@@ -68,16 +96,16 @@ def make_reference_data_for_inverse_estimation[F: np.floating, I: np.integer](
     u0 = chread_d(_track / f"Disp-{rest}.D")
     ut = chread_d(_track / f"Disp-{final}.D")
     data = {
-        "Noise": noise,
-        "Xi": xi,
-        "X0": xi - u0 * init,
-        "Xt": xi - u0 * init,
-        "U0": -u0 * init,
-        "Ut": ut * init,
-        "P0": chread_d(_track / f"Pres-{rest}.D") * init,
-        "Pt": chread_d(_track / f"Pres-{final}.D") * init,
-        "DLDM": dm[None, :],
-        "CLDispt": ut - u0 + noise,
+        _pfx.noise: noise,
+        _pfx.xi: xi,
+        _pfx.x0: xi - u0 * init,
+        _pfx.xt: xi - u0 * init,
+        _pfx.u0: -u0 * init,
+        _pfx.ut: ut * init,
+        _pfx.p0: chread_d(_track / f"Pres-{rest}.D") * init,
+        _pfx.pt: chread_d(_track / f"Pres-{final}.D") * init,
+        _pfx.dm: dm[None, :],
+        _pfx.data: ut - u0 + noise,
     }
     log.debug(f"Exporting initial values to {pb.P.D}")
     for k, v in data.items():
