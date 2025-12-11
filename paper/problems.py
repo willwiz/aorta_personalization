@@ -95,7 +95,7 @@ PROBS_FORWARD_BULGE = [
             DL_i=3,
         ),
         track=Path("track_bent_bulge"),
-        motion_var="Disp*",
+        motion_var="DISP",
         matpars=MaterialProperty(m, _stiffness, _stiffness),
         pres=-10.0,
         ex_freq=1,
