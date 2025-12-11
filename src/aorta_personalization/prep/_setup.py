@@ -1,14 +1,16 @@
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
-import numpy as np
 from aorta_personalization.mesh._centerline import prep_topology_meshes
 from aorta_personalization.mesh._generation import prep_cheart_mesh
-from aorta_personalization.mesh.types import MeshInfo
-from aorta_personalization.problem.types import ProblemParameters
-from cheartpy.cl.struct import CLPartition
-from pytools.arrays import A2
-from pytools.logging.trait import ILogger
 from pytools.result import Err, Ok
+
+if TYPE_CHECKING:
+    import numpy as np
+    from aorta_personalization.mesh.types import MeshInfo
+    from aorta_personalization.problem.types import ProblemParameters
+    from cheartpy.cl.struct import CLPartition
+    from pytools.arrays import A2
+    from pytools.logging.trait import ILogger
 
 
 class _SetupReturnType(NamedTuple):

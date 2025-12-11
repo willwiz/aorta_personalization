@@ -2,10 +2,10 @@ from ._cmd import run_simulation, run_vtu
 from ._fields import make_longitudinal_field
 from ._postprocessing import (
     compute_stiffness_from_dl_field,
+    make_reference_data_for_inverse_estimation,
     postprocess_inverse_prob,
     postprocess_physical_space,
 )
-from ._postprocessing._reference_data import make_reference_data_for_inverse_estimation
 from ._setup import (
     run_setup,
 )
