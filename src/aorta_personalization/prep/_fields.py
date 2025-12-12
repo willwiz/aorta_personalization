@@ -15,6 +15,7 @@ class _MakeLongitudinalFieldKwargs(TypedDict, total=False):
     prefix: str
     n_t: int
     cores: int
+    prog_bar: bool
 
 
 def make_longitudinal_field(
@@ -32,7 +33,7 @@ def make_longitudinal_field(
             pass
         case Err(e):
             return Err(e)
-    with futures.ProcessPoolExecutor(cores) as executor:
-        args: PEXEC_ARGS = [([(root / f"{prefix}-{i}.D"), cl[:, [0]]], {}) for i in idx]
-        parallel_exec(executor, chwrite_d_utf, args, prog_bar=True)
+    args: PEXEC_ARGS = [([(root / f"{prefix}-{i}.D"), cl[:, [0]]], {}) for i in idx]
+    with futures.ProcessPoolExecutor(cores) as exe:
+        parallel_exec(exe, chwrite_d_utf, args, prog_bar=kwargs.get("prog_bar", False))
     return Ok(None)

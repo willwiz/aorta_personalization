@@ -93,6 +93,7 @@ def postprocess_inverse_mechanics(
 
 class _PostProcessInverseProbKwargs(TypedDict, total=False):
     log: Required[ILogger]
+    prog_bar: bool
     cores: int
 
 
@@ -105,8 +106,12 @@ def postprocess_inverse_prob[F: np.floating, I: np.integer](
     **kwargs: Unpack[_PostProcessInverseProbKwargs],
 ) -> list[str]:
     log = kwargs.get("log", NLOGGER)
+    _bar = kwargs.get("prog_bar", True)
+    _cores = kwargs.get("cores", 1)
     log.info("Post processing exported variables")
-    postprocess_physical_space(mesh.DIR / (mesh.DISP + "_FE.X"), "Disp", space="Space", home=pb.P.D)
+    postprocess_physical_space(
+        mesh.DIR / (mesh.DISP + "_FE.X"), "Disp", home=pb.P.D, cores=_cores, prog_bar=_bar
+    )
     postprocess_inverse_mechanics(("U0", "RefDisp"), root_dir=pb.P.D, log=log)
     match expand_cl_variables_to_main_topology(cl_top, cl, "0LM", "tLM", root_dir=pb.P.D):
         case Ok(cl_vars):

@@ -72,7 +72,7 @@ def run_vtu(
         mesh=str(mesh.DIR / mesh.DISP),
         space=space,
         input_dir=str(pb.P.D),
-        output_dir=str(pb.P.N),
+        output_dir=str(pb.P.D),
         cores=cores,
         variables=vs,
     )

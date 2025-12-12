@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 def check_for_vars(root: Path, *vs: str, max_idx: int = 100) -> list[str]:
-    return [v for v in vs if (root / f"{v}-{max_idx}.D").exists()]
+    return [v for v in vs if (root / f"{v}-{max_idx}.D").is_file()]
 
 
 class _AddWriteVarKwargs(TypedDict, total=False):

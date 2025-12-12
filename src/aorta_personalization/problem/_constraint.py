@@ -22,6 +22,7 @@ class _Config(NamedTuple):
 class _RBodyConsKwargs(TypedDict, total=False):
     inlet: str
     outlet: str
+    motion: FSCouplingProblem | None
 
 
 CARD_DIRECTIONS: set[Literal["x", "y", "z"]] = {"x", "y", "z"}
@@ -42,17 +43,17 @@ def create_rigid_body_constraints(
     space: IVariable,
     svars: SolidProbVars,
     geo: Geometries,
-    motion_prob: FSCouplingProblem | None,
     **kwargs: Unpack[_RBodyConsKwargs],
 ) -> dict[str, FSCouplingProblem]:
     _inlet = kwargs.get("inlet", "Inlet")
     _outlet = kwargs.get("outlet", "Outlet")
+    _no_motion = kwargs.get("motion_prob") is None
     surf_orientation: Mapping[str, set[Literal["x", "y", "z"]]] = {
         _inlet: {"x"},
         _outlet: {"z" if geo is Geometries.BENT_CYLINDER else "x"},
     }
     cons: Mapping[str, ROT_CONS_CHOICE] = {
-        s: {"T": (CARD_DIRECTIONS - orient) if motion_prob else set(), "R": orient}
+        s: {"T": (CARD_DIRECTIONS - orient) if _no_motion else set(), "R": orient}
         for (s, orient) in surf_orientation.items()
     }
     pars: Mapping[str, _Config | None] = {

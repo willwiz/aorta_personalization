@@ -58,8 +58,8 @@ def create_topology_list(
         interfaces = [*interfaces, create_top_interface("OneToOne", [vol_lin, vol_body])]
     return (
         ProblemTopologies(
-            vol_lin,
             vol_body,
+            vol_lin,
             vol_body,
             inner=surf[mesh.INNER.name],
             outer=surf[mesh.OUTER.name],
