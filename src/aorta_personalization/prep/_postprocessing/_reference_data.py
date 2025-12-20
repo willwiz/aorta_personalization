@@ -64,18 +64,6 @@ def make_reference_data_for_inverse_estimation[F: np.floating, I: np.integer](
     log.debug("Creating Noise Field for displacement")
     _pfx = _unpack_variable_prefixes(**kwargs)
     files = (f.name for f in _track.glob("Disp-*.D"))
-    match get_var_index(files, "Disp"):
-        case Ok(items):
-            final = max(items)
-            rest = int(pb.target * final)
-            init = pb.t0 / pb.nt
-        case Err(e):
-            return Err(e)
-    log.debug(
-        f"Reference data will be taken from {_track}",
-        f"The reference time step is taken as {rest}",
-        f"The final time step is taken as {final}",
-    )
     normal = chread_d(mesh.DIR / mesh.NORMAL)
     noise = create_noise(pb.noise, cl, normal, spatial_freq=(pb.spac * 3, pb.spac * 5)) * 0.0
     t = np.linspace(0, 1, dl_part.nn)
@@ -91,7 +79,19 @@ def make_reference_data_for_inverse_estimation[F: np.floating, I: np.integer](
         case "sine":
             dm = 0.1 * (pb.matpars.baseline + pb.matpars.amplitude * np.cos(np.pi * t) ** 2) - 1.0
         case "circ":
-            dm = 0.1 * (pb.matpars.baseline + pb.matpars.amplitude * np.exp(-2.0 * t)) - 1.0
+            dm = 0.1 * (pb.matpars.baseline + 0.5 * pb.matpars.amplitude * np.exp(-2.0 * t)) - 1.0
+    match get_var_index(files, "Disp"):
+        case Ok(items):
+            final = max(items)
+            rest = int(pb.target * final)
+            init = pb.t0 / pb.nt
+        case Err(e):
+            return Err(e)
+    log.debug(
+        f"Reference data will be taken from {_track}",
+        f"The reference time step is taken as {rest}",
+        f"The final time step is taken as {final}",
+    )
     xi = chread_d(_track / f"Space-{rest}.D")
     u0 = chread_d(_track / f"Disp-{rest}.D")
     ut = chread_d(_track / f"Disp-{final}.D")
@@ -100,7 +100,7 @@ def make_reference_data_for_inverse_estimation[F: np.floating, I: np.integer](
         _pfx.xi: xi,
         _pfx.x0: xi - u0 * init,
         _pfx.xt: xi - u0 * init,
-        _pfx.u0: -u0 * init,
+        _pfx.u0: u0 * init,
         _pfx.ut: ut * init,
         _pfx.p0: chread_d(_track / f"Pres-{rest}.D") * init,
         _pfx.pt: chread_d(_track / f"Pres-{final}.D") * init,

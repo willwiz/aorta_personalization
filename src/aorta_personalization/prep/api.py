@@ -9,10 +9,9 @@ from ._postprocessing import (
 from ._setup import (
     run_setup,
 )
-from ._tools import addwrite_var, check_for_vars
+from ._tools import check_for_vars, write_subvar
 
 __all__ = [
-    "addwrite_var",
     "check_for_vars",
     "compute_stiffness_from_dl_field",
     "make_longitudinal_field",
@@ -22,4 +21,5 @@ __all__ = [
     "run_setup",
     "run_simulation",
     "run_vtu",
+    "write_subvar",
 ]

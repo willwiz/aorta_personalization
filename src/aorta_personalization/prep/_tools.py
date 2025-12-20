@@ -18,7 +18,7 @@ class _AddWriteVarKwargs(TypedDict, total=False):
     disp: str
 
 
-def addwrite_var(lbl: Labels, i: int, **prefix: Unpack[_AddWriteVarKwargs]) -> None:
+def write_subvar(lbl: Labels, i: int, **prefix: Unpack[_AddWriteVarKwargs]) -> None:
     disp_i = prefix.get("disp_i", "U0")
     disp_t = prefix.get("disp_t", "Ut")
     disp = prefix.get("disp", "Disp")

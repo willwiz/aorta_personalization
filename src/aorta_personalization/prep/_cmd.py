@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from aorta_personalization.mesh.types import MeshInfo
     from aorta_personalization.problem.types import ProblemParameters
     from cheartpy.cl.struct import CLPartition
-    from pytools.logging.api import ILogger
+    from pytools.logging.trait import ILogger
 
     from ._types import PFileGenerator
 
@@ -45,7 +45,8 @@ def run_simulation[F: np.floating, I: np.integer](
     err = run_problem(prob_name, pedantic=pedantic, cores=cores, log=prob_log)
     log.info(f"Simulation exited with error {err}")
     if err > 0:
-        raise RuntimeError
+        msg = f"Cheart simulation failed with error code {err}"
+        raise RuntimeError(msg)
 
 
 def cheart2vtu_cmdline_args(
@@ -68,11 +69,12 @@ def run_vtu(
     cores: int = 4,
 ) -> None:
     cheart2vtu_api(
+        "find",
         prefix="res",
         mesh=str(mesh.DIR / mesh.DISP),
         space=space,
-        input_dir=str(pb.P.D),
+        input_dir=pb.P.D,
         output_dir=str(pb.P.D),
         cores=cores,
-        variables=vs,
+        var=vs,
     )

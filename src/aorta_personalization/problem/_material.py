@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, TypedDict, Unpack, overload
 import numpy as np
 from cheartpy.fe.api import create_expr
 from cheartpy.fe.trait import IVariable
+from pytools.result import Err, Ok
 
 from ._types import ClNodalLmType, MaterialProperty
 
@@ -122,34 +123,35 @@ def create_stiffness_expressions(
     *,
     top: CLStructure,
     **kwargs: Unpack[_StiffnessExpressionKwargs],
-) -> IExpression: ...
+) -> Ok[IExpression] | Err: ...
 @overload
 def create_stiffness_expressions(
     mode: MaterialProperty,
     *,
     field: IVariable,
     **kwargs: Unpack[_StiffnessExpressionKwargs],
-) -> IExpression: ...
+) -> Ok[IExpression] | Err: ...
 def create_stiffness_expressions(
     mode: ClNodalLmType | IVariable | MaterialProperty,
     *,
     field: IVariable | None = None,
     top: CLStructure | None = None,
     **kwargs: Unpack[_StiffnessExpressionKwargs],
-) -> IExpression:
+) -> Ok[IExpression] | Err:
     match mode:
         case IVariable():
             if top is None:
                 msg = "topology must be provided when mode is IVariable"
-                raise ValueError(msg)
-            return _create_single_variable_stiffness_expr(mode, top, **kwargs)
+                return Err(ValueError(msg))
+            val = _create_single_variable_stiffness_expr(mode, top, **kwargs)
         case Mapping():
             if top is None:
                 msg = "topology must be provided when mode is ClNodalLmType"
-                raise ValueError(msg)
-            return _create_multi_variable_stiffness_expr(mode, top, **kwargs)
+                return Err(ValueError(msg))
+            val = _create_multi_variable_stiffness_expr(mode, top, **kwargs)
         case MaterialProperty():
             if field is None:
                 msg = "field must be provided when mode is MaterialProperty"
-                raise ValueError(msg)
-            return create_material_stiffness_expr(mode, field, **kwargs)
+                return Err(ValueError(msg))
+            val = create_material_stiffness_expr(mode, field, **kwargs)
+    return Ok(val)

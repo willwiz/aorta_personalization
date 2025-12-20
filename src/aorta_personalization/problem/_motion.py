@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, TypedDict, Unpack, overload
 
 from cheartpy.fe.api import create_expr, create_variable
+from pytools.result import Err, Ok
 
 if TYPE_CHECKING:
     from aorta_personalization.mesh.types import ProblemTopologies
@@ -49,7 +50,7 @@ def create_motion_variable(
     top: ProblemTopologies,
     prob: ProblemParameters,
     **kwargs: Unpack[_MotionVarKwargs],
-) -> None: ...
+) -> Ok[None]: ...
 @overload
 def create_motion_variable(
     motion: MOTION_VAR,
@@ -57,16 +58,16 @@ def create_motion_variable(
     top: ProblemTopologies,
     prob: ProblemParameters,
     **kwargs: Unpack[_MotionVarKwargs],
-) -> IVariable: ...
+) -> Ok[IVariable] | Err: ...
 def create_motion_variable(
     motion: MOTION_VAR | None,
     prefix: str,
     top: ProblemTopologies,
     prob: ProblemParameters,
     **kwargs: Unpack[_MotionVarKwargs],
-) -> IVariable | None:
+) -> Ok[IVariable] | Ok[None] | Err:
     if motion is None:
-        return None
+        return Ok(None)
     var = create_variable(prefix, top.U, 3, freq=prob.ex_freq)
     match motion:
         case "Zeros":
@@ -77,14 +78,14 @@ def create_motion_variable(
         case "DISP":
             if prob.track is None:
                 msg = "ProblemParameters.track must be set for motion_var='DISP'"
-                raise ValueError(msg)
+                return Err(ValueError(msg))
             var.add_setting("TEMPORAL_UPDATE_FILE", prob.track / "Disp*")
         case "VAR":
             if prob.track is None:
                 msg = "ProblemParameters.track must be set for motion_var='VAR'"
-                raise ValueError(msg)
+                return Err(ValueError(msg))
             var.add_setting("TEMPORAL_UPDATE_FILE", prob.track / f"{var}*")
         case "STEP":
             step = kwargs.get("step", prob.nt)
             var = _update_motionvar_step(var, top.U, prob, step)
-    return var
+    return Ok(var)

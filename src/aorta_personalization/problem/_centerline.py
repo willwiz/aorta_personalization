@@ -10,6 +10,7 @@ from cheartpy.fe.api import (
     create_topology,
     create_variable,
 )
+from pytools.result import Err, Ok
 
 if TYPE_CHECKING:
     from aorta_personalization.mesh.types import MeshInfo, ProblemTopologies
@@ -24,20 +25,20 @@ class _CLTopRVar[T: (CLStructure, None)](NamedTuple):
 @overload
 def create_centerline_topology_list[F: np.floating, I: np.integer](
     mesh: MeshInfo, tops: ProblemTopologies, part: None, field: IVariable
-) -> _CLTopRVar[None]: ...
+) -> Ok[_CLTopRVar[None]] | Err: ...
 @overload
 def create_centerline_topology_list[F: np.floating, I: np.integer](
     mesh: MeshInfo, tops: ProblemTopologies, part: CLPartition[F, I], field: IVariable
-) -> _CLTopRVar[CLStructure]: ...
+) -> Ok[_CLTopRVar[CLStructure]] | Err: ...
 def create_centerline_topology_list[F: np.floating, I: np.integer](
     mesh: MeshInfo, tops: ProblemTopologies, part: CLPartition[F, I] | None, field: IVariable
-) -> _CLTopRVar[CLStructure] | _CLTopRVar[None]:
+) -> Ok[_CLTopRVar[CLStructure]] | Ok[_CLTopRVar[None]] | Err:
     if part is None:
-        return _CLTopRVar(None, [])
+        return Ok(_CLTopRVar(None, []))
     basis = tops.inner.get_basis()
     if basis is None:
         msg = "Centerline basis not found in topology"
-        raise ValueError(msg)
+        return Err(ValueError(msg))
     cl_top = create_topology(
         f"TP{part.prefix}Az{basis.order}",
         basis,
@@ -79,4 +80,4 @@ def create_centerline_topology_list[F: np.floating, I: np.integer](
     struct = CLStructure(
         part.prefix, part.in_surf, part.nn, part.ne, cl_top, lm_top, support_var, elem, basis, b_vec
     )
-    return _CLTopRVar(struct, interfaces)
+    return Ok(_CLTopRVar(struct, interfaces))
