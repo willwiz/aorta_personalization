@@ -46,7 +46,7 @@ def run_simulation[F: np.floating, I: np.integer](
     log.info(f"Simulation exited with error {err}")
     if err > 0:
         msg = f"Cheart simulation failed with error code {err}"
-        raise RuntimeError(msg)
+        log.error(msg)
 
 
 def cheart2vtu_cmdline_args(

@@ -102,7 +102,7 @@ def postprocess_inverse_prob[F: np.floating, I: np.integer](
     mesh: MeshInfo,
     cl: A2[F],
     cl_top: CLPartition[F, I] | None,
-    _dl_top: CLPartition[F, I],
+    dl_top: CLPartition[F, I],
     **kwargs: Unpack[_PostProcessInverseProbKwargs],
 ) -> list[str]:
     log = kwargs.get("log", NLOGGER)
@@ -120,14 +120,14 @@ def postprocess_inverse_prob[F: np.floating, I: np.integer](
             log.error(f"Failed to expand CL variables: {e}")
             cl_vars = []
     log.info("Computing stiffness")
-    # match compute_stiffness_from_dl_field(dl_top, "DM", cl, root_dir=pb.P.D):
-    #     case Ok(None):
-    #         stiff = []
-    #     case Ok(stiff):
-    #         stiff = ["Stiff"]
-    #     case Err(e):
-    #         log.error(f"Failed to compute stiffness from DL field: {e}")
-    #         stiff = []
+    match compute_stiffness_from_dl_field(dl_top, "DM", cl, root_dir=pb.P.D):
+        case Ok(None):
+            stiff = []
+        case Ok(stiff):
+            stiff = ["Stiff"]
+        case Err(e):
+            log.error(f"Failed to compute stiffness from DL field: {e}")
+            stiff = []
     # pres0, prest = "P0", "Pt"
     # if M.ORDER == 2:
     #     post_process_vars_to_quad(
@@ -149,5 +149,5 @@ def postprocess_inverse_prob[F: np.floating, I: np.integer](
     for i in items:
         write_subvar(pb.P, i, disp_i="U0", disp_t="Ut", disp="Disp")
     log.info("Creating vtus")
-    export_vars = ["Disp", "RefDisp", "Stiff", "CLField", "X0", "Xt", "Xi", "U0", "Ut", "CLz"]
-    return [*export_vars, *cl_vars]
+    export_vars = ["Disp", "RefDisp", "CLField", "X0", "Xt", "Xi", "U0", "Ut", "CLz"]
+    return [*export_vars, *cl_vars, *stiff]
