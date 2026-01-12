@@ -12,6 +12,7 @@ from cheartpy.io.api import (
     chwrite_d_utf,
 )
 from pytools.path import clear_dir
+from pytools.result import Err, Ok
 
 if TYPE_CHECKING:
     from cheartpy.cl.struct import CLPartition
@@ -31,9 +32,9 @@ def setup_separated_cl_meshes[F: np.floating, I: np.integer](
     mesh_tuple: _MeshInput[F, I],
     *,
     log: ILogger,
-) -> CLPartition[F, I] | None:
+) -> Ok[CLPartition[F, I]] | Ok[None] | Err:
     if prefix is None:
-        return None
+        return Ok(None)
     mesh, cheart_mesh, cl = mesh_tuple
     ftype = cheart_mesh.space.v.dtype
     dtype = cheart_mesh.top.v.dtype
@@ -50,18 +51,22 @@ def setup_separated_cl_meshes[F: np.floating, I: np.integer](
         *cl_top.n_prefix.values(), home=mesh.DIR, bc=False
     ):
         log.info("CL topology already exists, skipped")
-        return cl_top
+        return Ok(cl_top)
     norm_field = chread_d(mesh.DIR / mesh.NORMAL, dtype=ftype)
     log.debug("Creating cl topologies")
     log.debug("Creating cl meshes")
-    cl_meshs = create_cheart_cl_nodal_meshes(
+    match create_cheart_cl_nodal_meshes(
         mesh.DIR, cheart_mesh, cl, cl_top, in_surf, normal_check=norm_field, log=log
-    )
+    ):
+        case Ok(cl_meshs):
+            pass
+        case Err(e):
+            return Err(e)
     log.debug("Saving cl meshes")
     for v in cl_meshs.values():
         v["mesh"].save(v["file"])
         chwrite_d_utf(v["file"].parent / (v["file"].name + "Normal-0.D"), v["n"])
-    return cl_top
+    return Ok(cl_top)
 
 
 def prep_topology_meshes[F: np.floating, I: np.integer](
@@ -71,9 +76,9 @@ def prep_topology_meshes[F: np.floating, I: np.integer](
     mesh_tuple: _MeshInput[F, I],
     *,
     log: ILogger,
-) -> CLPartition[F, I] | None:
+) -> Ok[CLPartition[F, I]] | Ok[None] | Err:
     if prefix is None:
-        return None
+        return Ok(None)
     mesh, cheart_mesh, cl = mesh_tuple
     ftype = cheart_mesh.space.v.dtype
     dtype = cheart_mesh.top.v.dtype
@@ -88,7 +93,7 @@ def prep_topology_meshes[F: np.floating, I: np.integer](
         *cl_top.n_prefix.values(), home=mesh.DIR, bc=False
     ):
         log.info("CL topology already exists, skipped")
-        return cl_top
+        return Ok(cl_top)
     clear_dir(
         mesh.DIR,
         *[rf"{cl_top.prefix}*.{s}" for s in ["T", "X", "B", "PART", "INIT"]],
@@ -98,9 +103,13 @@ def prep_topology_meshes[F: np.floating, I: np.integer](
     norm_field = chread_d(mesh.DIR / mesh.NORMAL, dtype=ftype)
     log.debug("Creating cl topologies")
     log.debug("Creating cl meshes")
-    lin_mesh, interface_mesh = create_cheart_cl_topology_meshes(
+    match create_cheart_cl_topology_meshes(
         mesh.DIR, cheart_mesh, cl, cl_top, in_surf, normal_check=norm_field, log=log
-    )
+    ):
+        case Ok((lin_mesh, interface_mesh)):
+            pass
+        case Err(e):
+            return Err(e)
     log.debug("Saving cl meshes")
     lin_mesh.save(mesh.DIR / f"{prefix}Az{mesh.ORDER}")
     # const_mesh.save(path(M.DIR, f"{prefix}Az{0}"))
@@ -110,4 +119,4 @@ def prep_topology_meshes[F: np.floating, I: np.integer](
         mesh.DIR / f"{prefix}Az{'L'}V_Elem.INIT",
         np.identity(cl_top.nn, dtype=float),
     )
-    return cl_top
+    return Ok(cl_top)

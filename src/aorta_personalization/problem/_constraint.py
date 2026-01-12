@@ -47,7 +47,7 @@ def create_rigid_body_constraints(
 ) -> dict[str, FSCouplingProblem]:
     _inlet = kwargs.get("inlet", "Inlet")
     _outlet = kwargs.get("outlet", "Outlet")
-    _no_motion = kwargs.get("motion_prob") is None
+    _no_motion = kwargs.get("motion") is None
     surf_orientation: Mapping[str, set[Literal["x", "y", "z"]]] = {
         _inlet: {"x"},
         _outlet: {"z" if geo is Geometries.BENT_CYLINDER else "x"},

@@ -52,7 +52,7 @@ def create_mesh(mesh: MeshInfo, *, log: ILogger) -> Ok[MeshTuple[np.float64, np.
                 )
             )
         case Geometries.AORTA:
-            return Ok(setup_aorta_mesh(mesh, log=log))
+            return setup_aorta_mesh(mesh, log=log).next()
         case Geometries.BRANCHED_CYLINDER:
             raise NotImplementedError
 
@@ -66,4 +66,4 @@ def prep_cheart_mesh(
                 return res
             case Err(e):
                 log.info(str(e), "Creating new mesh")
-    return create_mesh(mesh, log=log)
+    return create_mesh(mesh, log=log).next()

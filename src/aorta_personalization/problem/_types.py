@@ -63,6 +63,7 @@ class Labels:
 class ProblemParameters:
     P: Final[Labels]
     track: Path | None
+    init: Path | None
     motion_var: MOTION_VAR | None
     matpars: MaterialProperty
     pres: float = -6.0

@@ -73,7 +73,7 @@ def create_grad_stiffness_expr(
 ) -> IExpression:
     a, b = pars.amplitude, pars.baseline
     e = kwargs.get("exponent", 0.5)
-    stiff_expr = create_expr("stiff_expr", [f"{b} + {a} * exp(-2*{field}.1)", f"{e}"])
+    stiff_expr = create_expr("stiff_expr", [f"{b} + {a} * exp(-3*{field}.1)", f"{e}"])
     stiff_expr.add_deps(field)
     return stiff_expr
 
@@ -97,7 +97,7 @@ def create_circ_stiffness_expr(
     e = kwargs.get("exponent", 0.5)
     stiff_expr = create_expr(
         "stiff_expr",
-        [f"{b} + {a}*(exp(-3*(1-{field}.1))*cos({2 * np.pi} * {field}.2))", f"{e}"],
+        [f"{1.5 * b} + {0.5 * a}*exp(-3*(1-{field}.1))*(2*{field}.2 - 1)", f"{e}"],
     )
     stiff_expr.add_deps(field)
     return stiff_expr

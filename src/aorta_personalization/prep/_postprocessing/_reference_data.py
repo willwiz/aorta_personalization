@@ -60,12 +60,13 @@ def make_reference_data_for_inverse_estimation[F: np.floating, I: np.integer](
 ) -> Ok[None] | Err:
     log = kwargs.get("log", NLOGGER)
     _track = pb.track or Path()
+    _init_folder = pb.init or Path()
     log.debug(f"Importing mesh from {mesh.DIR / mesh.DISP}")
     log.debug("Creating Noise Field for displacement")
     _pfx = _unpack_variable_prefixes(**kwargs)
     files = (f.name for f in _track.glob("Disp-*.D"))
     normal = chread_d(mesh.DIR / mesh.NORMAL)
-    noise = create_noise(pb.noise, cl, normal, spatial_freq=(pb.spac * 3, pb.spac * 5)) * 0.0
+    noise = create_noise(pb.noise, cl, normal, spatial_freq=(pb.spac * 3, pb.spac * 5))
     t = np.linspace(0, 1, dl_part.nn)
     match pb.matpars.form:
         case "const":
@@ -79,7 +80,7 @@ def make_reference_data_for_inverse_estimation[F: np.floating, I: np.integer](
         case "sine":
             dm = 0.1 * (pb.matpars.baseline + pb.matpars.amplitude * np.cos(np.pi * t) ** 2) - 1.0
         case "circ":
-            dm = 0.1 * (pb.matpars.baseline + 0.5 * pb.matpars.amplitude * np.exp(-2.0 * t)) - 1.0
+            dm = 0.1 * (pb.matpars.baseline + 0.0 * pb.matpars.amplitude * np.exp(-2.0 * t)) - 1.0
     match get_var_index(files, "Disp"):
         case Ok(items):
             final = max(items)
@@ -88,22 +89,23 @@ def make_reference_data_for_inverse_estimation[F: np.floating, I: np.integer](
         case Err(e):
             return Err(e)
     log.debug(
-        f"Reference data will be taken from {_track}",
+        f"Reference data will be taken from {_init_folder}",
         f"The reference time step is taken as {rest}",
         f"The final time step is taken as {final}",
     )
-    xi = chread_d(_track / f"Space-{rest}.D")
-    u0 = chread_d(_track / f"Disp-{rest}.D")
-    ut = chread_d(_track / f"Disp-{final}.D")
+    xi = chread_d(_init_folder / f"Space-{rest}.D")
+    scale_factor = 1.0
+    u0 = chread_d(_init_folder / f"Disp-{rest}.D")
+    ut = chread_d(_init_folder / f"Disp-{final}.D")
     data = {
         _pfx.noise: noise,
         _pfx.xi: xi,
         _pfx.x0: xi - u0 * init,
         _pfx.xt: xi - u0 * init,
         _pfx.u0: u0 * init,
-        _pfx.ut: ut * init,
-        _pfx.p0: chread_d(_track / f"Pres-{rest}.D") * init,
-        _pfx.pt: chread_d(_track / f"Pres-{final}.D") * init,
+        _pfx.ut: ut * init * scale_factor,
+        _pfx.p0: chread_d(_init_folder / f"Pres-{rest}.D") * init,
+        _pfx.pt: chread_d(_init_folder / f"Pres-{final}.D") * init,
         _pfx.dm: dm[None, :],
         _pfx.data: ut - u0 + noise,
     }
@@ -112,12 +114,12 @@ def make_reference_data_for_inverse_estimation[F: np.floating, I: np.integer](
         chwrite_d_utf((pb.P.D / f"{k}.INIT"), v)
     if cl_part is None:
         return Ok(None)
-    cl0data = chread_d(_track / f"CLLM-{rest}.D")
+    cl0data = chread_d(_init_folder / f"CLLM-{rest}.D")
     cl0 = cast(
         "A2[F]",
         PchipInterpolator(np.linspace(0, 1, len(cl0data)), cl0data)(cl_part.node),
     )
-    cltdata = chread_d(_track / f"CLLM-{final}.D")
+    cltdata = chread_d(_init_folder / f"CLLM-{final}.D")
     clt = cast(
         "A2[F]",
         PchipInterpolator(np.linspace(0, 1, len(cltdata)), cltdata)(cl_part.node),

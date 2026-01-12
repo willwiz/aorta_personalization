@@ -53,13 +53,20 @@ def run_setup(
         case Ok((cheart_mesh, cl_arr)):
             pass
         case Err(e):
-            log.error(f"Mesh prep failed: {e}")
             return Err(e)
-    cl_top = prep_topology_meshes(
+    match prep_topology_meshes(
         prob.P.CL, prob.P.CL_i, prob.P.CL_n, (mesh, cheart_mesh, cl_arr), log=log
-    )
-    dl_top = prep_topology_meshes(
+    ):
+        case Ok(cl_top):
+            pass
+        case Err(e):
+            return Err(e)
+    match prep_topology_meshes(
         prob.P.DL, prob.P.DL_i, prob.P.DL_n, (mesh, cheart_mesh, cl_arr), log=log
-    )
+    ):
+        case Ok(dl_top):
+            pass
+        case Err(e):
+            return Err(e)
     log.info("Topology prep done")
     return Ok(_SetupReturnType(cl=cl_arr, cl_top=cl_top, dl_top=dl_top))
