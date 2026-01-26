@@ -8,14 +8,13 @@ from ._types import ElementTypes, MeshInfo
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from cheartpy.fe.aliases import CHEART_ELEMENT_TYPE, CHEART_QUADRATURE_TYPE
+    from cheartpy.fe.aliases import CHEART_ELEMENT_TYPE
     from cheartpy.fe.trait import ITopInterface
 
 
 class _IntegrationScheme(NamedTuple):
     elem: CHEART_ELEMENT_TYPE
     surf: CHEART_ELEMENT_TYPE
-    method: CHEART_QUADRATURE_TYPE
     np: int
 
 
@@ -23,17 +22,17 @@ _ALLOWED_ORDERS = (1, 2)
 
 
 _MESH_INTEGRATION_SCHEMES: dict[ElementTypes, _IntegrationScheme] = {
-    ElementTypes.HEX: _IntegrationScheme("HEXAHEDRAL_ELEMENT", "QUADRILATERAL_ELEMENT", "GL", 9),
-    ElementTypes.TET: _IntegrationScheme("TETRAHEDRAL_ELEMENT", "TRIANGLE_ELEMENT", "KL", 4),
+    ElementTypes.HEX: _IntegrationScheme("HEXAHEDRAL_ELEMENT", "QUADRILATERAL_ELEMENT", 9),
+    ElementTypes.TET: _IntegrationScheme("TETRAHEDRAL_ELEMENT", "TRIANGLE_ELEMENT", 4),
 }
 
 
 def create_topology_list(
     mesh: MeshInfo,
 ) -> tuple[ProblemTopologies, Sequence[ITopInterface]]:
-    (body_elem, surf_elem, method, n_gp) = _MESH_INTEGRATION_SCHEMES[mesh.ELEM]
-    basis_vol = {i: create_basis(body_elem, "NL", method, i, n_gp) for i in _ALLOWED_ORDERS}
-    basis_surf = {i: create_basis(surf_elem, "NL", method, i, n_gp) for i in _ALLOWED_ORDERS}
+    (body_elem, surf_elem, n_gp) = _MESH_INTEGRATION_SCHEMES[mesh.ELEM]
+    basis_vol = {i: create_basis(body_elem, "NL", i, gp=n_gp) for i in _ALLOWED_ORDERS}
+    basis_surf = {i: create_basis(surf_elem, "NL", i, gp=n_gp) for i in _ALLOWED_ORDERS}
     vol_lin = create_topology("TPLin", basis_vol[1], mesh.DIR / mesh.PRES)
     if mesh.ORDER == 1:
         vol_body = vol_lin

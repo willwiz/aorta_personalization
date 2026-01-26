@@ -10,7 +10,7 @@ from ._types import Geometries, MeshInfo, MeshTuple
 
 if TYPE_CHECKING:
     import numpy as np
-    from pytools.logging.trait import ILogger
+    from pytools.logging import ILogger
 
 
 def find_meshes(

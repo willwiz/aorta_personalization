@@ -1,11 +1,11 @@
-from concurrent import futures
 from pathlib import Path
 from typing import TYPE_CHECKING, TypedDict, Unpack
 
 import numpy as np
 from cheartpy.io.api import chread_d, chwrite_d_utf
 from cheartpy.search.api import get_var_index
-from pytools.parallel import PEXEC_ARGS, parallel_exec
+from pytools.parallel import ThreadedRunner
+from pytools.progress import ProgressBar
 from pytools.result import Err, Ok
 
 if TYPE_CHECKING:
@@ -68,13 +68,14 @@ def postprocess_physical_space(
             pass
         case Err(e):
             return Err(e)
-    phys_args: PEXEC_ARGS = [
+    phys_args = [
         ([x_i, disp, i], {"home": home, "space": kwargs.get("space", "Space")}) for i in items
     ]
-    stiff_args: PEXEC_ARGS = [
-        ([i], {"home": home, "prefix": kwargs.get("stiff", "Stiff")}) for i in items
-    ]
-    with futures.ProcessPoolExecutor(max_workers=kwargs.get("cores", 1)) as exe:
-        parallel_exec(exe, update_physical_space, phys_args, prog_bar=_bar)
-        parallel_exec(exe, stripe_modulus_from_stiff_var, stiff_args, prog_bar=_bar)
+    stiff_args = [([i], {"home": home, "prefix": kwargs.get("stiff", "Stiff")}) for i in items]
+    bart = ProgressBar(len(phys_args) + len(stiff_args)) if _bar else None
+    with ThreadedRunner(cores=kwargs.get("cores", 1), mode="thread", prog_bar=bart) as exe:
+        for args, kw in phys_args:
+            exe.submit(update_physical_space, *args, **kw)
+        for args, kw in stiff_args:
+            exe.submit(stripe_modulus_from_stiff_var, *args, **kw)
     return Ok(None)

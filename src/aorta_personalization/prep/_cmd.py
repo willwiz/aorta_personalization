@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from aorta_personalization.mesh.types import MeshInfo
     from aorta_personalization.problem.types import ProblemParameters
     from cheartpy.cl.struct import CLPartition
-    from pytools.logging.trait import ILogger
+    from pytools.logging import ILogger
 
     from ._types import PFileGenerator
 
@@ -38,8 +38,11 @@ def run_simulation[F: np.floating, I: np.integer](
     with Path(prob_name).open("w") as f:
         pfile.write(f)
     log.info(f"{prob_name} is written to file")
-    clear_dir(mesh.DIR, "PART", "IN")
-    run_prep(prob_name)
+    clear_dir(mesh.DIR, "*.PART", "*.IN")
+    err = run_prep(prob_name)
+    if err > 0:
+        msg = f"Cheart prep failed with error code {err}"
+        log.error(msg)
     log.info(f"Running Cheart ({prob_log}):")
     log.info(f"Results are saved to {pfile.output_dir}:")
     err = run_problem(prob_name, pedantic=pedantic, cores=cores, log=prob_log)
@@ -75,6 +78,6 @@ def run_vtu(
         space=space,
         input_dir=pb.P.D,
         output_dir=str(pb.P.D),
-        cores=cores,
+        core=cores,
         var=vs,
     )

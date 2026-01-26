@@ -6,7 +6,7 @@ from aorta_personalization.prep._cl_variables import expand_cl_variables_to_main
 from aorta_personalization.prep._tools import write_subvar
 from cheartpy.io.api import chread_d, chwrite_d_utf
 from cheartpy.search.api import get_var_index
-from pytools.logging.api import NLOGGER
+from pytools.logging import NLOGGER
 from pytools.result import Err, Ok
 
 from ._forward import postprocess_physical_space
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from aorta_personalization.problem.types import ProblemParameters
     from cheartpy.cl.struct import CLPartition
     from pytools.arrays import A2
-    from pytools.logging.trait import ILogger
+    from pytools.logging import ILogger
 
 
 class _UpdateStiffnessKwargs(TypedDict, total=False):

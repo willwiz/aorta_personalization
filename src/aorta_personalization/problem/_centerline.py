@@ -44,7 +44,7 @@ def create_centerline_topology_list[F: np.floating, I: np.integer](
         basis,
         (mesh.DIR / f"{part.prefix}Az{basis.order}"),
     )
-    lm_basis = create_basis(basis.elem, basis.basis.kind, basis.quadrature.kind, 0, basis.gp)
+    lm_basis = create_basis(basis.elem, basis.basis.kind, 0, gp=basis.gp)
     lm_top = create_topology(
         f"TP{part.prefix}Az{'L'}", lm_basis, mesh.DIR / f"{part.prefix}Az{'L'}"
     )

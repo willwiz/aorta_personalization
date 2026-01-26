@@ -5,7 +5,7 @@ import numpy as np
 from cheartpy.cl.noise import create_noise
 from cheartpy.io.api import chread_d, chwrite_d_utf
 from cheartpy.search.api import get_var_index
-from pytools.logging.api import NLOGGER
+from pytools.logging import NLOGGER, ILogger
 from pytools.result import Err, Ok
 from scipy.interpolate import PchipInterpolator
 
@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from aorta_personalization.problem.types import ProblemParameters
     from cheartpy.cl.struct import CLPartition
     from pytools.arrays import A2
-    from pytools.logging.trait import ILogger
 
 
 class _MakeReferenceDataKwargs(TypedDict, total=False):

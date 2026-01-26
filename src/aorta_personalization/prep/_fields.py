@@ -1,9 +1,8 @@
-from concurrent import futures
 from typing import TYPE_CHECKING, TypedDict, Unpack
 
 from cheartpy.io.api import chread_d, chwrite_d_utf
 from cheartpy.search.api import get_var_index
-from pytools.parallel import PEXEC_ARGS, parallel_exec
+from pytools.parallel import ThreadedRunner
 from pytools.result import Err, Ok
 
 if TYPE_CHECKING:
@@ -33,7 +32,8 @@ def make_longitudinal_field(
             pass
         case Err(e):
             return Err(e)
-    args: PEXEC_ARGS = [([(root / f"{prefix}-{i}.D"), cl[:, [0]]], {}) for i in idx]
-    with futures.ProcessPoolExecutor(cores) as exe:
-        parallel_exec(exe, chwrite_d_utf, args, prog_bar=kwargs.get("prog_bar", False))
+    args = ([(root / f"{prefix}-{i}.D"), cl[:, [0]]] for i in idx)
+    with ThreadedRunner(cores, mode="thread") as exe:
+        for a in args:
+            exe.submit(chwrite_d_utf, *a, prog_bar=kwargs.get("prog_bar", False))
     return Ok(None)

@@ -1,14 +1,13 @@
 from typing import TYPE_CHECKING, Literal, NamedTuple, TypedDict, Unpack
 
 from aorta_personalization.mesh.types import Geometries, ProblemTopologies
-from cheartpy.cl.rotation import ROT_CONS_CHOICE, create_rotation_constraint
-from cheartpy.fe.api import create_variable
+from cheartpy.fe.physics.fs_coupling import ROT_CONS_CHOICE, create_rotation_constraint
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from aorta_personalization.solid.types import SolidProbVars
-    from cheartpy.fe.physics.fs_coupling.struct import FSCouplingProblem
+    from cheartpy.fe.physics.fs_coupling import FSCouplingProblem
     from cheartpy.fe.trait import IVariable
     from cheartpy.fe.trait._basic import ICheartTopology
 
@@ -31,10 +30,8 @@ CARD_DIRECTIONS: set[Literal["x", "y", "z"]] = {"x", "y", "z"}
 def _create_rigid_body_constraints_from_config(
     c: _Config, space: IVariable, disp: IVariable, sfx: str
 ) -> FSCouplingProblem:
-    dim = sum(len(k) for k in c.cons.values())
-    lm = create_variable(f"{c.pfx}LM{sfx}", None, dim, freq=-1)
     return create_rotation_constraint(
-        f"P{c.pfx}{sfx}", c.top, c.cons, space=space, disp=disp, lm=lm
+        f"P{c.pfx}{sfx}", c.top, c.cons, space=space, disp=disp, freq=-1
     )
 
 

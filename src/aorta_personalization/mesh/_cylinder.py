@@ -2,8 +2,8 @@ from typing import TYPE_CHECKING, Literal, NamedTuple
 
 from cheartpy.io.api import chwrite_d_utf
 from cheartpy.mesh.cylinder_core.api import create_cylinder_mesh
-from cheartpy.mesh.surface_core.surface import normalize_by_row
-from pytools.logging.trait import LogLevel
+from cheartpy.mesh.surface_core.normals import normalize_by_row
+from pytools.logging import ILogger, LogLevel
 from pytools.path import clear_dir
 
 from ._types import MeshTuple
@@ -11,7 +11,6 @@ from ._variables import create_center_pos, create_fiber_field, define_centerline
 
 if TYPE_CHECKING:
     import numpy as np
-    from pytools.logging.trait import ILogger
 
     from ._types import CylinderDims, MeshInfo
 

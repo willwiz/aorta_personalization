@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, TypedDict, Unpack
 
-from cheartpy.fe.physics.fs_coupling.struct import FSCouplingProblem, FSExpr
+from cheartpy.fe.physics.fs_coupling import FSCouplingProblem, FSExpr
 
 if TYPE_CHECKING:
     from collections.abc import Sequence

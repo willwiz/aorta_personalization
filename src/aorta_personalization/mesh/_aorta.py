@@ -10,7 +10,7 @@ from pytools.result import Err, Ok
 if TYPE_CHECKING:
     import numpy as np
     from aorta_personalization.mesh._types import MeshInfo
-    from pytools.logging.trait import ILogger
+    from pytools.logging import ILogger
 
 
 _MRI_DIR = Path("DATA_AORTA")

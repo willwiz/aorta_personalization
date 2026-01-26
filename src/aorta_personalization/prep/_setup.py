@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING, NamedTuple
 
-from aorta_personalization.mesh._centerline import prep_topology_meshes
-from aorta_personalization.mesh._generation import prep_cheart_mesh
+from aorta_personalization.mesh.api import prep_cheart_mesh, prep_topology_meshes
 from pytools.result import Err, Ok
 
 if TYPE_CHECKING:
@@ -10,7 +9,7 @@ if TYPE_CHECKING:
     from aorta_personalization.problem.types import ProblemParameters
     from cheartpy.cl.struct import CLPartition
     from pytools.arrays import A2
-    from pytools.logging.trait import ILogger
+    from pytools.logging import ILogger
 
 
 class _SetupReturnType(NamedTuple):

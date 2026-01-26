@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from cheartpy.cl.struct import CLPartition
     from cheartpy.mesh.struct import CheartMesh
     from pytools.arrays import A2
-    from pytools.logging.trait import ILogger
+    from pytools.logging import ILogger
 
     from ._types import MeshInfo
 
