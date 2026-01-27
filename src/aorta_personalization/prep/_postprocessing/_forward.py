@@ -73,7 +73,7 @@ def postprocess_physical_space(
     ]
     stiff_args = [([i], {"home": home, "prefix": kwargs.get("stiff", "Stiff")}) for i in items]
     bart = ProgressBar(len(phys_args) + len(stiff_args)) if _bar else None
-    with ThreadedRunner(cores=kwargs.get("cores", 1), mode="thread", prog_bar=bart) as exe:
+    with ThreadedRunner(thread=kwargs.get("cores", 1), prog_bar=bart) as exe:
         for args, kw in phys_args:
             exe.submit(update_physical_space, *args, **kw)
         for args, kw in stiff_args:

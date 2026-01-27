@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, TypedDict, Unpack
 from cheartpy.io.api import chread_d, chwrite_d_utf
 from cheartpy.search.api import get_var_index
 from pytools.parallel import ThreadedRunner
-from pytools.progress._progress_bar import ProgressBar
+from pytools.progress import ProgressBar
 from pytools.result import Err, Ok
 
 if TYPE_CHECKING:
@@ -35,7 +35,7 @@ def make_longitudinal_field(
             return Err(e)
     args = ([(root / f"{prefix}-{i}.D"), cl[:, [0]]] for i in idx)
     bart = ProgressBar(len(idx)) if kwargs.get("prog_bar", False) else None
-    with ThreadedRunner(cores, mode="thread", prog_bar=bart) as exe:
+    with ThreadedRunner(thread=cores, prog_bar=bart) as exe:
         for a in args:
             exe.submit(chwrite_d_utf, *a)
     return Ok(None)

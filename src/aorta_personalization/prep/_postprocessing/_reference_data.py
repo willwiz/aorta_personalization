@@ -87,13 +87,13 @@ def make_reference_data_for_inverse_estimation[F: np.floating, I: np.integer](
             init = pb.t0 / pb.nt
         case Err(e):
             return Err(e)
-    log.debug(
+    log.info(
         f"Reference data will be taken from {_init_folder}",
         f"The reference time step is taken as {rest}",
         f"The final time step is taken as {final}",
     )
     xi = chread_d(_init_folder / f"Space-{rest}.D")
-    scale_factor = 1.0
+    scale_factor = 0.95
     u0 = chread_d(_init_folder / f"Disp-{rest}.D")
     ut = chread_d(_init_folder / f"Disp-{final}.D")
     data = {

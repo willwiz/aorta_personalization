@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Required, TypedDict, Unpack
 
 import numpy as np
 from cheartpy.fe.cmd import run_prep, run_problem
-from cheartpy.paraview.api import cheart2vtu_api
+from cheartpy.paraview.api import cheart2vtu_find
 from pytools.path import clear_dir
 
 if TYPE_CHECKING:
@@ -32,6 +32,7 @@ def run_simulation[F: np.floating, I: np.integer](
     pedantic = kwargs.get("pedantic", False)
     cores = kwargs.get("cores", 16)
     prob_name, prob_log = [pb.P.N + ext for ext in [".P", ".log"]]
+    prep_log = pb.P.N + ".prep.log"
     log.info(f"Starting {prob_name}")
     log.info("Making P-file")
     pfile = pfile_call(pb, mesh, *parts).unwrap()
@@ -39,7 +40,7 @@ def run_simulation[F: np.floating, I: np.integer](
         pfile.write(f)
     log.info(f"{prob_name} is written to file")
     clear_dir(mesh.DIR, "*.PART", "*.IN")
-    err = run_prep(prob_name)
+    err = run_prep(prob_name, log=prep_log)
     if err > 0:
         msg = f"Cheart prep failed with error code {err}"
         log.error(msg)
@@ -71,13 +72,12 @@ def run_vtu(
     space: str | None = None,
     cores: int = 4,
 ) -> None:
-    cheart2vtu_api(
-        "find",
+    cheart2vtu_find(
         prefix="res",
         mesh=str(mesh.DIR / mesh.DISP),
         space=space,
         input_dir=pb.P.D,
-        output_dir=str(pb.P.D),
+        output_dir=pb.P.D,
         core=cores,
         var=vs,
     )
