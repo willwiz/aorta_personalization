@@ -98,7 +98,6 @@ def prep_topology_meshes[F: np.floating, I: np.integer](
         mesh.DIR,
         *[rf"{cl_top.prefix}*.{s}" for s in ["T", "X", "B", "PART", "INIT"]],
         rf"interface-{cl_top.prefix}*.IN",
-        log=log,
     )
     norm_field = chread_d(mesh.DIR / mesh.NORMAL, dtype=ftype)
     log.debug("Creating cl topologies")
