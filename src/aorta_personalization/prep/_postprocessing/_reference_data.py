@@ -5,7 +5,7 @@ import numpy as np
 from cheartpy.cl.noise import create_noise
 from cheartpy.io.api import chread_d, chwrite_d_utf
 from cheartpy.search.api import get_var_index
-from pytools.logging import NLOGGER, ILogger
+from pytools.logging import ILogger, get_logger
 from pytools.result import Err, Ok
 from scipy.interpolate import PchipInterpolator
 
@@ -57,7 +57,7 @@ def make_reference_data_for_inverse_estimation[F: np.floating, I: np.integer](
     dl_part: CLPartition[F, I],
     **kwargs: Unpack[_MakeReferenceDataKwargs],
 ) -> Ok[None] | Err:
-    log = kwargs.get("log", NLOGGER)
+    log = kwargs.get("log", get_logger())
     _track = pb.track or Path()
     _init_folder = pb.init or Path()
     log.debug(f"Importing mesh from {mesh.DIR / mesh.DISP}")
@@ -79,7 +79,7 @@ def make_reference_data_for_inverse_estimation[F: np.floating, I: np.integer](
         case "sine":
             dm = 0.1 * (pb.matpars.baseline + pb.matpars.amplitude * np.cos(np.pi * t) ** 2) - 1.0
         case "circ":
-            dm = 0.1 * (pb.matpars.baseline + 0.0 * pb.matpars.amplitude * np.exp(-2.0 * t)) - 1.0
+            dm = np.full_like(t, 0.1 * (pb.matpars.baseline + 0.5 * pb.matpars.amplitude) - 1.0)
     match get_var_index(files, "Disp"):
         case Ok(items):
             final = max(items)

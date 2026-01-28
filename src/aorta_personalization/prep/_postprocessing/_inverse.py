@@ -2,11 +2,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Required, TypedDict, Unpack
 
 import numpy as np
-from aorta_personalization.prep._cl_variables import expand_cl_variables_to_main_topology
-from aorta_personalization.prep._tools import write_subvar
+from aorta_personalization.prep import expand_cl_variables_to_main_topology, write_subvar
 from cheartpy.io.api import chread_d, chwrite_d_utf
 from cheartpy.search.api import get_var_index
-from pytools.logging import NLOGGER
+from pytools.logging import get_logger
 from pytools.result import Err, Ok
 
 from ._forward import postprocess_physical_space
@@ -105,7 +104,7 @@ def postprocess_inverse_prob[F: np.floating, I: np.integer](
     dl_top: CLPartition[F, I],
     **kwargs: Unpack[_PostProcessInverseProbKwargs],
 ) -> list[str]:
-    log = kwargs.get("log", NLOGGER)
+    log = kwargs.get("log", get_logger())
     _bar = kwargs.get("prog_bar", True)
     _cores = kwargs.get("cores", 1)
     log.info("Post processing exported variables")

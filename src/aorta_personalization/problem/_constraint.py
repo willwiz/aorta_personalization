@@ -8,8 +8,7 @@ if TYPE_CHECKING:
 
     from aorta_personalization.solid.types import SolidProbVars
     from cheartpy.fe.physics.fs_coupling import FSCouplingProblem
-    from cheartpy.fe.trait import IVariable
-    from cheartpy.fe.trait._basic import ICheartTopology
+    from cheartpy.fe.trait import ICheartTopology, IVariable
 
 
 class _Config(NamedTuple):
