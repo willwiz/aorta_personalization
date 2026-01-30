@@ -7,7 +7,7 @@ from cheartpy.fe.trait import IVariable
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytools.logging import LOG_LEVEL
+    from pytools.logging import LogLevel
 
 
 CL_PARTITIONS = Literal["motion", "dilation"]
@@ -74,4 +74,4 @@ class ProblemParameters:
     dt: float = 0.001
     noise: float = 0.0
     spac: int = 1
-    log: LOG_LEVEL = "DEBUG"
+    log: LogLevel = "DEBUG"

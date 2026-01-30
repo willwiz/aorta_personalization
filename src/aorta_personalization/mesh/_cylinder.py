@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Literal, NamedTuple
 from cheartpy.io.api import chwrite_d_utf
 from cheartpy.mesh.cylinder_core.api import create_cylinder_mesh
 from cheartpy.mesh.surface_core.normals import normalize_by_row
-from pytools.logging import ILogger, LogLevel
+from pytools.logging import ILogger, LogEnum
 from pytools.path import clear_dir
 
 from ._types import MeshTuple
@@ -21,13 +21,13 @@ class _TupleLogMessage(NamedTuple):
 
 
 def _remake_cylinder_mesh_msgs(
-    mesh: MeshInfo, *, level: LogLevel, quad: Literal[True, False], warp: bool
+    mesh: MeshInfo, *, level: LogEnum, quad: Literal[True, False], warp: bool
 ) -> _TupleLogMessage:
     info = [
         f"Clearing all files in {mesh.DIR}",
         f"Remaking Mesh with as Quad={quad} and Warped={warp}",
     ]
-    if level < LogLevel.DEBUG:
+    if level < LogEnum.DEBUG:
         return _TupleLogMessage(info, [])
     _map = [
         mesh.FIELD,
